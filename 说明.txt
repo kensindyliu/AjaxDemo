@@ -1,0 +1,5 @@
+SQLOperation文件是处理SQL相关的文件，可以用生成的DAO也可以用自己手动写的SQL来达到目的
+Trip类对应数据库里的表
+如果是自动生成的DAO代码
+connection string需要在web.config及app.config体现出来
+entityframwork在2个工程都要引用
