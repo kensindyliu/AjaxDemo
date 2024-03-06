@@ -1,0 +1,217 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+@Scripts.Render("~/bundles/jquery")
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        loadData();
+    })
+    function loadData() {
+        $.ajax({
+            url: "/Trip/GetTrip",
+            type: "GET",
+            contentType: "application/json",
+            dataType: "",
+            success: function (response) {
+                // console.log(response);
+
+                $('#btnAdd').show();
+                $('#btnUpdate').hide();
+                var html = '';
+
+                $.each(response, function (key, item) {
+                    /*var date1 = new Date(parseInt(item.StartDate.substr(6)));
+                    var formattedDate1 = date1.toLocalDateString();
+                    var date2 = new Date(parseInt(item.EndDate.substr(6)));
+                    var formattedDate2 = date1.toLocalDateString();*/
+                    html += '<tr>';
+                    html += '<td>' + item.Destination + '</td>';
+                    html += '<td>' + item.Description + '</td>';
+                    html += '<td>' + item.StartDate + '</td>';
+                    html += '<td>' + item.EndDate + '</td>';
+                    html += '<td><a href="#" onClick="return getTripById(' + item.TripID + ')">Edit</a> | <a href="#" onClick="Delete(' + item.TripID + ')">Delete</a></td>';
+                    html += '</tr>';
+                });
+                $('.tbody').html(html);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        });
+    }
+    function getTripById(Id) {
+        // alert(Id);
+        console.log("/Trip/GetTripById" + Id);
+        $.ajax({
+            url: "/Trip/GetTripById/" + Id,
+           // data: JSON.stringify({ id: Id }),
+            type: "GET",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                console.log(response);
+                $('#myModal').modal('show');
+                $('#btnAdd').hide();
+                $('#btnUpdate').show();
+                $('#destination').val(response.Destination);
+                $('#description').val(response.Description);
+                $('#startdate').val(response.StartDate);
+                $('#enddate').val(response.EndDate);
+                $('#TripId').val(response.TripID);
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        })
+    }
+    function update() {
+        var tripObj = {
+            Destination: $('#destination').val(),
+            Description: $('#description').val(),
+            StartDate: $('#startdate').val(),
+            EndDate: $('#enddate').val(),
+            TripID: $('#TripId').val(),
+        };
+        $.ajax({
+            url: "/Trip/UpdateTrip",
+            data: JSON.stringify(tripObj),
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                if (response == true) {
+                    loadData();
+                    $('#myModal').modal('hide');
+                    $('.modal-backdrop').remove();
+                    clearTextBoxes();
+                } else {
+                    alert('Enddate have to be greater than startdate');
+                }
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        })
+    }
+    function Add() {
+        var tripObj = {
+            Destination: $('#destination').val(),
+            Description: $('#description').val(),
+            StartDate: $('#startdate').val(),
+            EndDate: $('#enddate').val(),
+        };
+        $.ajax({
+            url: "/Trip/AddTrip",
+            data: JSON.stringify(tripObj),
+            type: "POST",
+            contentType: "application/json",
+            dataType: "json",
+            success: function (response) {
+                if (response == true) {
+                    loadData();
+                    $('#myModal').modal('hide');
+                    //$('.modal-backdrop').remove();
+                    clearTextBoxes();
+                } else {
+                    alert('Enddate have to be greater than startdate');
+                }
+            },
+            error: function (errormessage) {
+                alert(errormessage.responseText);
+            }
+        })
+    }
+    function Delete(TripID) {
+
+        var ans = confirm('Are you sure you want to delete this trip?');
+        if (ans) {
+            $.ajax({
+                url: "/Trip/DeleteTrip/",
+                data: JSON.stringify({ TripID: TripID }),
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                success: function (response) {
+                    loadData();
+
+                },
+                error: function (errormessage) {
+                    alert(errormessage.responseText);
+                }
+            });
+        }
+    }
+
+    function clearTextBoxes() {
+        $('#destination').val("");
+        $('#description').val("");
+        $('#startdate').val("");
+        $('#enddate').val("");
+    }
+</script>
+<h2>Index</h2>
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#myModal">Add New Trip</button>
+<table class="table table-bordered table-hover">
+    <thead>
+        <tr>
+            <td>Destination</td>
+            <td>Description</td>
+            <td>Trip Start Date</td>
+            <td>Trip End Date</td>
+            <td>Action</td>
+        </tr>
+    </thead>
+    <tbody class="tbody">
+        @*Trip records will to populated here*@
+    </tbody>
+</table>
+<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title">ADD TRIP</h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <input type="hidden" class="form-control" id="TripId" name="TripId" />
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="destination" name="destination" placeholder="Destination of trip" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="text" class="form-control" id="description" name="description" placeholder="Destination of trip" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="date" class="form-control" id="startdate" name="startdate" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <input type="date" class="form-control" id="enddate" name="enddate" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-primary" id="btnAdd" onclick="return Add();">Add</button>
+                        <button type="button" class="btn btn-outline-primary" id="btnUpdate" onclick="return update();">Update</button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
