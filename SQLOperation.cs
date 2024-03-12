@@ -9,6 +9,7 @@ namespace DataService
 {
     public class SQLOperation
     {
+        // public static string Connectionstring = "Data Source=.;Initial Catalog=EventManager;User ID=sa;Password=kensindy;"; //TrustServerCertificate=true;
         public List<trip> GetTrips()
         {
             List<trip> trips = new List<trip>();
